@@ -1,161 +1,124 @@
-# OTA Example
+# 简介
+
+阿里云的[物联网平台](https://www.aliyun.com/product/iot)提供安全可靠的设备连接通信能力, 帮助用户将海量设备数据采集上云
+
+设备可通过集成 `Link SDK` 具备连接物联网平台服务器的能力, 以及进而使用物联网平台的其它高级能力
 
 ---
-**NOTES**
+这个SDK以C99编写, 开源发布, 支持多种操作系统和硬件平台, 阅读本文开始使用, 访问[SDK的线上文档首页](https://code.aliyun.com/linksdk/docs/wikis/home)得到更多信息
 
-- This guide applies to all OTA update examples
-- "ESP-Dev-Board" refers to any Espressif chipset development board (e.g., ESP32/ESP32-S2/ESP32-C3 etc.)
+# 了解SDK架构
+
+<img src="https://linkkit-export.oss-cn-shanghai.aliyuncs.com/sdk_new_arch.png" width="800">
+
+# 获取SDK内容及用户编程导引
+
+> **SDK基座:** [下载地址](https://code.aliyun.com/linksdk/base/repository/archive.zip?ref=master)
+
+下载SDK基座得到的, 主要含上图中的**SDK核心模块**, 它本身已是完整可用的了, 点击以下链接阅读编程导引开始使用
+
++ [MQTT连云能力](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/MQTT_Connect)
++ [HTTP连云能力](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/HTTP_Connect)
++ [RRPC](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/RRPC_Process)
++ [在线设备接收广播](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/Broadcast_Process)
+
 ---
+除此以外, 以上获取的SDK基座上, 还可以由用户选择动态安插, 装备上其它高阶的能力, 点击以下链接阅读编程导引开始使用
 
++ [Bootstrap(引导服务)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/Bootstrap_Service)
++ [OTA(固件升级)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/OTA_Service)
++ [Data-Model(物模型)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/Data_Model_Process)
++ [Dynreg(动态注册)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/Dynreg_Service)
++ [NTP(时间同步)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/NTP_Service)
++ [Shadow(设备影子)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/Shadow_Service)
++ [Logpost(日志上云)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/Logpost_Service)
++ [Devinfo(设备标签)](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/Devinfo_Service)
 
-## Overview
+---
+在面向应用的编程导引外, 以上所有组件也提供面向代码的详细手册, [SDK的线上手册地址](http://gaic.alicdn.com/ztms/linkkit/html/index.html)
 
-An application on "ESP-Dev-Board" may be upgraded at runtime by downloading a new image via Wi-Fi or Ethernet and flashing it to an OTA partition. The ESP-IDF offers two methods to perform Over The Air (OTA) upgrades:
+# 装备高阶能力
 
-- Using the native APIs provided by the [`app_update`](../../../components/app_update) component.
-- Using simplified APIs provided by the [`esp_https_ota`](../../../components/esp_https_ota) component, which provides functionality to upgrade over HTTPS.
+以上高阶能力, 任意两两之间无依赖关系, 仅依赖SDK核心模块(`core`目录), 用户装备任一种能力的方式都是一致的
 
-Use of the native API is demonstrated in the `native_ota_example` directory while the API provided by the `esp_https_ota` component is demonstrated under `simple_ota_example` and `advanced_https_ota`.
++ 下载组件压缩包, 每一种高阶能力对应一个组件代码压缩包
++ 解压组件压缩包, 放置到 `components/xxx` 目录
 
-For information regarding the `esp_https_ota` component, please refer to [ESP HTTPS OTA](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/esp_https_ota.html).
+> 目前已就绪的高阶组件有
 
-For simplicity, the OTA examples use a pre-defined partition table created by enabling the `CONFIG_PARTITION_TABLE_TWO_OTA` option in menuconfig, which supports three app partitions: `factory`, `OTA_0` and `OTA_1`. Please refer to [Partition Tables](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/partition-tables.html) for more information.
+| **高阶组件**    | **组件说明**                                | **下载地址**
+|:---------------:|---------------------------------------------|-----------------------------------------------------------------------------------------------------------------
+| `Bootstrap`     | *实时动态的同步国家与地区的建连信息给设备*  | [Bootstrap组件下载链接](https://code.aliyun.com/linksdk/linksdk-bootstrap/repository/archive.zip?ref=master)
+| `OTA`           | *固件升级和远程配置*                        | [OTA组件下载链接](https://code.aliyun.com/linksdk/linksdk-ota/repository/archive.zip?ref=master)
+| `Data-Model`    | *使用属性, 事件, 服务构成的物模型描述设备*  | [Data-Model组件下载链接](https://code.aliyun.com/linksdk/linksdk-data-model/repository/archive.zip?ref=master)
+| `Dynreg`        | *在设备运行时分配`deviceSecret`以简化烧录*  | [Dynreg组件下载链接](https://code.aliyun.com/linksdk/linksdk-dynreg/repository/archive.zip?ref=master)
+| `NTP`           | *基于MQTT协议从云平台获取标准时间*          | [NTP组件下载链接](https://code.aliyun.com/linksdk/linksdk-ntp/repository/archive.zip?ref=master)
+| `Shadow`        | *基于MQTT协议获取或更新云端缓存模型*        | [Shadow组件下载链接](https://code.aliyun.com/linksdk/linksdk-shadow/repository/archive.zip?ref=master)
+| `Logpost`       | *基于MQTT协议上报设备日志到云端控制台*      | [Logpost组件下载链接](https://code.aliyun.com/linksdk/linksdk-logpost/repository/archive.zip?ref=master)
+| `Devinfo`       | *基于MQTT协议上报标签删除或标签更新请求*    | [Devinfo组件下载链接](https://code.aliyun.com/linksdk/linksdk-devinfo/repository/archive.zip?ref=master)
 
-On first boot, the bootloader will load the image contained on the `factory` partition (i.e. the example image). This firmware triggers an OTA upgrade. It will download a new image from an HTTPS server and save it into the `OTA_0` partition. Next, it updates the `ota_data` partition to indicate which app should boot after the next reset. Upon reset, the bootloader  reads the contents of the `ota_data` partition to determine which application is selected to run.
+# SDK使用的最佳实践
 
-The OTA workflow is illustrated in the following diagram:
+为直观的了解SDK的移植和使用, 可点击链接访问以下的实际场景中开发文档记录, 参考官方给出的使用者角度最佳实践
 
-![OTA Workflow](ota_workflow.png)
+## 移植实例
 
-## How to use the examples
++ [乐鑫ESP8266移植](http://code.aliyun.com/linksdk/docs/wikis/best-practice/ESP8266_Porting)
++ [乐鑫ESP32移植](http://code.aliyun.com/linksdk/docs/wikis/best-practice/ESP32_Porting)
++ [MCU+TCP模组(SIM800C)移植](http://code.aliyun.com/linksdk/docs/wikis/best-practice/SIM800C_TCP_Porting)
++ [MCU+MQTT模组(N720V5)移植](http://code.aliyun.com/linksdk/docs/wikis/best-practice/N720V5_MQTT_Porting)
++ [Android源码树内移植](http://code.aliyun.com/linksdk/docs/wikis/best-practice/Android_Intree_Porting)
++ [Android源码树外NDK移植](http://code.aliyun.com/linksdk/docs/wikis/best-practice/Android_NDK_Porting)
 
-### Hardware Required
+## 特殊的TLS认证模式
 
-"ESP-Dev-Board" is necessary to run the OTA examples. Make sure Ethernet is configured correctly if testing OTA with Ethernet. For further information about setting up Ethernet, please refer to the Ethernet [examples](../../ethernet).
++ [基于PSK的TLS连接](http://code.aliyun.com/linksdk/docs/wikis/best-practice/TLS_PSK_Auth)
++ [基于X509的TLS连接](http://code.aliyun.com/linksdk/docs/wikis/best-practice/TLS_X509_Auth)
 
-### Configure the project
+# 编译方式
 
-Open the project configuration menu (`idf.py menuconfig`).
+**`Link SDK`完全由高移植性的C语言源文件构成**, 用户应使用惯用的任意编译方式, 将这些C文件(`demos`目录除外)跟自己的其它源文件编译到一起即可使用它
 
-In the `Example Connection Configuration` menu:
-
-* Choose the network interface in the `Connect using`  option based on your board. Currently  both Wi-Fi and Ethernet are supported
-* If the Wi-Fi interface is used, provide the Wi-Fi SSID and password of the AP you wish to connect to
-* If using the Ethernet interface, set the PHY model under `Ethernet PHY Device` option, e.g. `IP101`
-
-In the `Example Configuration` menu:
-
-* Set the URL of the firmware to download in the `Firmware Upgrade URL` option. The format should be `https://<host-ip-address>:<host-port>/<firmware-image-filename>`, e.g. `https://192.168.2.106:8070/hello_world.bin`
-  * **Note:** The server part of this URL (e.g. `192.168.2.106`) must match the **CN** field used when [generating the certificate and key](#run-https-server)
-
-### Build and Flash
-
-Run `idf.py -p PORT flash monitor` to build and flash the project. This command  checks if the partition table contains the `ota_data` partition and restores it to an initial state. This allows the newly loaded app to run from the `factory` partition.
-
-(To exit the serial monitor, type ``Ctrl-]``.)
-
-See the [Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/index.html) for all steps required to configure and use the ESP-IDF to build projects.
-
-## Example Output
-
-### Run HTTPS Server
-
-After a successful build, we need to create a self-signed certificate and run a simple HTTPS server as follows:
-
-![create_self_signed_certificate](https://dl.espressif.com/dl/esp-idf/docs/_static/ota_self_signature.gif)
-
-* Enter the directory containing build artifact/s of project, that will be hosted by HTTPS server, e.g. `cd build`.
-* To create a new self-signed certificate and key, run the command `openssl req -x509 -newkey rsa:2048 -keyout ca_key.pem -out ca_cert.pem -days 365 -nodes`.
-  * When prompted for the `Common Name (CN)`, enter the name of the server that the "ESP-Dev-Board" will connect to. When running this example from a development machine, this is probably the IP address. The HTTPS client will check that the `CN` matches the address given in the HTTPS URL.
-* To start the HTTPS server, run the command `openssl s_server -WWW -key ca_key.pem -cert ca_cert.pem -port 8070`.
-* This directory should contain the firmware (e.g. `hello_world.bin`) to be used in the update process. This can be any valid ESP-IDF application, as long as its filename corresponds to the name configured using `Firmware Upgrade URL` in menuconfig. The only difference to flashing a firmware via the serial interface is that the binary is flashed to the `factory` partition, while OTA update use one of the OTA partitions.
-* **Note:** Make sure incoming access to port *8070* is not prevented by firewall rules.
-* **Note:** Windows users may encounter issues while running `openssl s_server -WWW`, due to CR/LF translation and/or closing the connection prematurely
-  (Some windows builds of openssl translate CR/LF sequences to LF in the served files, leading to corrupted images received by the OTA client; others interpret the `0x1a`/`SUB` character in a binary as an escape sequence, i.e. end of file, and close the connection prematurely thus preventing the OTA client from receiving a complete image).
-  * We recommend  using the `openssl` binary bundled in `Git For Windows` from the [ESP-IDF Tool installer](https://docs.espressif.com/projects/esp-idf/en/latest/get-started/windows-setup.html):
-  Open the ESP-IDF command prompt and add the internal openssl binary to your path: `set PATH=%LocalAppData%\Git\usr\bin;%PATH%` and run openssl's http server command as above.
-  * Alternatively, use any windows based openssl with version `v1.1.1i` or greater built on the `Msys-x86_64` platform, or a simple python https server -- see `start_https_server` in the [example_test](simple_ota_example/example_test.py) script.
-
-### Flash Certificate to "ESP-Dev-Board"
-
-Finally, copy the generated certificate to the `server_certs` directory contained in the example directory so it can be flashed onto your device along with the firmware, e.g. `cp ca_cert.pem ../server_certs/`.
+---
+*如果用户使用安装有`GNU Make`的`Linux`主机开发环境, 可在SDK源码根目录运行*
 
 ```
-cp ca_cert.pem /path/to/ota/example/server_certs/
+make
 ```
 
-### Internal workflow of the OTA Example
+*编译SDK例程, 编好的例程在`output/xxxx_demo`, 运行这些例程可快速体验SDK和物联网平台的功能, 编程导引文档中也有例程的运行输出讲解*
 
-After booting, the firmware prints "Starting OTA example" to the console and:
+# 设计原则
 
-1. Connects via Ethernet or to the AP using the provided SSID and password (Wi-Fi case)
-2. Connects to the HTTPS server and downloads the new image
-3. Writes the image to flash, and instructs the bootloader to boot from this image after the next reset
-4. Reboots
+不论是MQTT连云这样放在`core`的SDK核心模块, 还是固件升级这样放在`components/xxx`的高阶组件, 一致使用以下的设计原则
 
-If you want to rollback to the `factory` app after the upgrade (or to the first OTA partition in case the `factory` partition does not exist), run the command `idf.py erase_otadata`. This restores the `ota_data` partition to its initial state.
++ 用户须知的API函数接口和数据结构, 在`xxx/aiot_xxx_api.h`头文件中列出, 以`aiot_xxx_yyy`风格命名
++ 这些API函数的实现源码, 在`xxx/aiot_xxx_api.c`中
++ 组件能力的使用范例, 在`xxx/demos/xxx_{basic,posix}_demo.c`中
++ 组件的API函数原型, 遵循统一的设计模式
 
-**Note:** This assumes that the partition table of this project is the one present on the device.
+    - `aiot_xxx_init()`: 初始化1个会话实例, 并设置默认参数
+    - `aiot_xxx_deinit()`: 销毁1个会话实例, 回收其占用资源
+    - `aiot_xxx_setopt()`: 配置1个会话实例的运行参数, 可用参数及用法在编程手册中有指出
+    - `aiot_xxx_send_yyy()`: 向云平台发起某种会话请求
+    - `aiot_xxx_recv()`: 从云平台接收请求的应答
 
-### Output from the HTTPS server
++ 组件能力运行时, 对外表达信息的方式, 遵循统一的设计模式
 
-```bash
-FILE:hello_world.bin
-ACCEPT
-```
+    - **API的返回值**: 是1个`16 bits`的非正数整型, 也叫**状态码**, `0`表成功, 其它值表达运行状态
+        * `retval = aiot_xxx_yyy()`方式获取返回值
+        * 所有返回值唯一对应内部运行分支, 含义详见`core/aiot_state_api.h`或`components/xxx/aiot_xxx_api.h`
+        * 所有组件的返回值的值域互不重叠, 共同分别分布在`0x0000 - 0xFFFF`
+    - **数据回调函数**: 是1个用户实现并传入SDK的回调函数, SDK从外界读取到值得关注的数据报文时, SDK会调用它, 用户可在此处理数据流
+        * `aiot_xxx_setopt(handle, AIOT_XXXOPT_RECV_HANDLER, user_recv_cb)`设置数据回调
+    - **事件回调函数**: 是1个用户实现并传入SDK的回调函数, SDK内部运行状态发生值得关注的变化时, SDK会调用它, 用户可在此处理控制流
+        * `aiot_xxx_setopt(handle, AIOT_XXXOPT_EVENT_HANDLER, user_event_cb)`设置事件回调
+    - **运行日志回调**: 是1个用户实现并传入SDK的回调函数, SDK运行时, 详细的运行日志字符串会实时输入到这个回调
+        * `aiot_state_set_logcb(user_log_cb)`设置日志回调
+        * 若不想看到SDK运行日志, 回调为空即可
+        * 日志格式统一为: `[timestamp][LK-XXXX] message`
+            + `XXXX`以数字形式标识了日志字符串, 它和返回值共享一个**状态码**分布空间, 都在`-0xFFFF ~ 0x0000`
+            + 利用SDK的高阶组件之一, 时间同步(`ntp`), 可进行网络对时, 此后日志中的`timestamp`会自动变成"年月日 时分秒"的易读模式
 
+> [**点此查看详细状态码清单**](http://code.aliyun.com/linksdk/docs/wikis/prog-guide/StateCode_List), 比如`-0x0305`代表MQTT连云时设备鉴权失败
 
-## Supporting Rollback
-
-This feature allows you to roll back to a previous firmware if new image is not useable. The menuconfig option `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE` allows you to track the first boot of the application (see the ``Over The Air Updates (OTA)`` article).
-
-The ``native_ota_example`` contains code to demonstrate how a rollback works. To use it, enable the `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE` option in the `Example Configuration` submenu of menuconfig to set `Number of the GPIO input for diagnostic` to manipulate the rollback process.
-
-To trigger a rollback, this GPIO must be pulled low while the message `Diagnostics (5 sec)...` is displayed during the first boot.
-
-If GPIO is not pulled low, the app is confirmed as operable.
-
-## Support for Versioning of Applications
-
-The ``native_ota_example`` contains code to demonstrate how to check the version of the application and prevent infinite firmware update loops. Only newer applications are downloaded. Version checking is performed after the first firmware image package containing version data is received. The application version is obtained from one of three places:
-
-1. If the `CONFIG_APP_PROJECT_VER_FROM_CONFIG` option is set, the value of `CONFIG_APP_PROJECT_VER` is used
-2. Else, if the ``PROJECT_VER`` variable is set in the project `CMakeLists.txt` file, this value is used
-3. Else, if the file ``$PROJECT_PATH/version.txt`` exists, its contents are used as ``PROJECT_VER``
-4. Else, if the project is located in a Git repository, the output of ``git describe`` is used
-5. Otherwise, ``PROJECT_VER`` will be "1"
-
-In ``native_ota_example``, ``$PROJECT_PATH/version.txt`` is used to define the app version. Change the version in the file to compile the new firmware.
-
-## Troubleshooting
-
-* Check that your PC can ping the "ESP-Dev-Board" using its IP, and that the IP, AP and other configuration settings are correctly configured in menuconfig
-* Check if any firewall software is preventing incoming connections on the PC
-* Check whether you can see the configured file (default `hello_world.bin`), by running the command `curl -v https://<host-ip-address>:<host-port>/<firmware-image-filename>`
-* Try viewing the file listing from a separate host or phone
-
-### Error "ota_begin error err=0x104"
-
-If you see this error, check that the configured (and actual) flash size is large enough for the partitions in the partition table. The default "two OTA slots" partition table requires at least 4MB flash size. To use OTA with smaller flash sizes, create a custom partition table CSV (for details see [Partition Tables](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/partition-tables.html)) and configure it in menuconfig.
-
-Make sure to run "idf.py erase-flash" after making changes to the partition table.
-
-### Local https server
-
-Running a local https server might be tricky in some cases (due to self signed certificates, or potential issues with `openssl s_server` on Windows). Here are some suggestions for alternatives:
-* Run a plain HTTP server to test the connection. (Note that using a plain http is **not secure** and should only be used for testing)
-    - Execute `python -m http.server 8070` in the directory with the firmware image
-    - Use http://<host-ip>:8070/<firmware-name> as the firmware upgrade URL
-    - Enable *Allow HTTP for OTA* (`CONFIG_OTA_ALLOW_HTTP`) in `Component config -> ESP HTTPS OTA` so the URI without TLS is accepted
-* Start the https server using [example_test](simple_ota_example/example_test.py) with two or more parameters: `example_test.py <BIN_DIR> <PORT> [CERT_DIR]`, where:
-    - `<BIN_DIR>` is a directory containing the image and by default also the certificate and key files:`ca_cert.pem` and `ca_key.pem`
-    - `<PORT>` is the server's port, here `8070`
-    - `[CERT_DIR]` is an optional argument pointing to a specific directory with the certificate and key file.
-    - example of the script output:
-``` bash
-$ cd idf/examples/system/ota/simple_ota_example
-$ python example_test.py build 8070
-Starting HTTPS server at "https://:8070"
-192.168.10.106 - - [02/Mar/2021 14:32:26] "GET /simple_ota.bin HTTP/1.1" 200 -
-```
-* Publish the firmware image on a public server (e.g. github.com) and copy its root certificate to the `server_certs` directory as `ca_cert.pem`. (The certificate can be downloaded using the `s_client` openssl command if the host includes the root certificate in the chain, e.g. `openssl s_client -showcerts -connect github.com:443 </dev/null`)
